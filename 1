@@ -105,18 +105,15 @@ export default function App() {
           applicableWeightSum += ind.weight;
           weightedSum += (rawScore / 5) * ind.weight;
           
-          // Critical Gate Logic: Fails if score < 3
           if (ind.risk === 'Critical' && rawScore < 3) {
             criticalFail = true;
             criticalFailList.push(ind.code);
           }
 
-          // Core Gate Logic
           if (ind.risk === 'Core') {
             coreIndicators.push({ code: ind.code, score: rawScore });
           }
 
-          // Advanced Performance Logic
           if (ind.risk === 'Advanced') {
             advancedPerformanceTotal += (rawScore / 5);
             advancedCount++;
@@ -563,107 +560,37 @@ export default function App() {
               </div>
 
               <aside className="space-y-6">
-                <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
-                  <BarChart3 className="absolute -right-6 -top-6 w-32 h-32 opacity-5" />
-                  <h3 className="text-sm font-black flex items-center gap-3 mb-8 uppercase tracking-widest border-b border-white/10 pb-4">
-                    Audit Metrics
-                  </h3>
-                  <div className="space-y-8">
-                    <div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Non-Conformity Totals</p>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
-                          <p className="text-3xl font-black text-rose-400 leading-none mb-1">{results.allIndicators.filter(i => i.risk === 'Critical' && i.score < 3).length}</p>
-                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Critical NC</p>
-                        </div>
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
-                          <p className="text-3xl font-black text-amber-400 leading-none mb-1">{results.allIndicators.filter(i => i.risk === 'Core' && i.score < 3).length}</p>
-                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Major NC</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Documentation Missing</p>
-                      <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-                        <p className="text-4xl font-black text-blue-400 leading-none mb-2">{results.allIndicators.filter(i => evidence[i.code] === 'Missing' || !evidence[i.code]).length}</p>
-                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Indicators without verification</p>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={() => window.print()}
-                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-sm transition-all shadow-[0_10px_20px_rgba(16,185,129,0.3)] flex items-center justify-center gap-3 active:scale-95"
-                    >
-                      <FileText size={18} />
-                      Generate Official Report
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="bg-white rounded-[2rem] border border-slate-200 p-8 shadow-sm">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 border-b border-slate-50 pb-4 text-center">Correction Protocols</h4>
+                 <div className="bg-slate-900 rounded-[2rem] p-8 text-white">
+                  <h3 className="text-lg font-black mb-6">Certification Health</h3>
                   <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <div className="w-1.5 h-12 rounded-full bg-rose-500 shrink-0" />
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2 rounded-xl ${results.criticalFail ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
+                        {results.criticalFail ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
+                      </div>
                       <div>
-                        <p className="text-xs font-black text-slate-800 uppercase mb-1">Critical (30 Days)</p>
-                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Immediate threat. Suspension occurs if NC is not closed within 30 days of detection.</p>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Critical Integrity</p>
+                        <p className="text-sm font-bold">{results.criticalFail ? 'Compromised' : 'Verified'}</p>
                       </div>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="w-1.5 h-12 rounded-full bg-amber-400 shrink-0" />
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-xl bg-blue-500/20 text-blue-500">
+                        <Map size={20} />
+                      </div>
                       <div>
-                        <p className="text-xs font-black text-slate-800 uppercase mb-1">Major (90 Days)</p>
-                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed italic">Systemic issue. Verification is conditional upon correction within 90 days.</p>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Score Vector</p>
+                        <p className="text-sm font-bold">{results.dimensionScore.toFixed(1)} / 100.0</p>
                       </div>
                     </div>
                   </div>
+                  <button className="w-full mt-10 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl transition-all shadow-lg shadow-emerald-900/20 uppercase tracking-widest text-xs">
+                    Export Analysis Report
+                  </button>
                 </div>
               </aside>
             </div>
           </div>
         )}
       </main>
-
-      {/* Global Status Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-white/10 px-6 py-4 flex items-center justify-between z-40 backdrop-blur-md bg-opacity-95 text-white">
-        <div className="flex items-center gap-6">
-          <div className="hidden sm:flex flex-col">
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1.5">Certification Tier</span>
-            <span className={`text-xs font-black tracking-tight ${results.criticalFail ? 'text-rose-400' : 'text-emerald-400'}`}>
-              {results.tier}
-            </span>
-          </div>
-          <div className="h-8 w-px bg-white/10 hidden sm:block" />
-          <div className="flex flex-col">
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1.5">Area Performance</span>
-            <span className="text-xs font-black">{results.dimensionScore.toFixed(1)}% <span className="text-slate-500 ml-1 font-bold">DIMENSION SCORE</span></span>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-           <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/5">
-              <div className={`w-1.5 h-1.5 rounded-full ${results.criticalFail ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
-              <span className="text-[10px] font-black uppercase text-slate-400">Live Assessment Mode</span>
-           </div>
-           <button 
-            onClick={() => {
-              const data = JSON.stringify({ scores, evidence });
-              const blob = new Blob([data], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `Turtle-Friendly-D1-Assessment.json`;
-              a.click();
-            }}
-            className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all shadow-lg active:scale-95"
-            title="Download Session Data"
-           >
-            <Map size={20} />
-           </button>
-        </div>
-      </footer>
     </div>
   );
 }
